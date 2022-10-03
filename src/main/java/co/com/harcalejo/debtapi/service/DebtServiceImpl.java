@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.LocalDate;
 import java.util.List;
 
 /**
@@ -57,9 +58,11 @@ public class DebtServiceImpl implements DebtService {
      * no puedan ser transformados
      */
     @Override
-    public Double calculateDebtLoan(Long loanId) throws JsonProcessingException {
+    public Double calculateDebtLoan(Long loanId, LocalDate before)
+            throws JsonProcessingException {
         final double loanAmount = getLoanAmount(loanId);
-        final double paymentsAmount = getPaymentsAmount(loanId);
+        final double paymentsAmount =
+                getPaymentsAmount(loanId, before);
 
         return Math.round(
                 (loanAmount - paymentsAmount)
@@ -85,12 +88,15 @@ public class DebtServiceImpl implements DebtService {
      * a un prestamo
      *
      * @param loanId identificador unico del prestamo
+     * @param before fecha para conocer la deuda antes de esta
      * @return valor total de los pagos realizados a un prestamo
      */
-    private double getPaymentsAmount(Long loanId) throws JsonProcessingException {
+    private double getPaymentsAmount(Long loanId, LocalDate before) throws JsonProcessingException {
         final String response = restTemplate.getForObject(
                 debtProperties
-                        .getPaymentApiUrl() + "/" + loanId, String.class);
+                        .getPaymentApiUrl()
+                        + "/" + loanId + "?before=" + before,
+                String.class);
 
         List<PaymentDTO> payments = transformJsonToPaymentList(response);
 

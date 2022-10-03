@@ -2,6 +2,8 @@ package co.com.harcalejo.debtapi.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
+import java.time.LocalDate;
+
 /**
  * La interface {@code DebtService} es el componente encargado de definir las
  * capacidades del servicio de Deuda. En este caso la Deuda se debe calcular
@@ -19,5 +21,6 @@ public interface DebtService {
      * @param loanId identificador unico del prestamo
      * @return valor de la deuda calculado
      */
-    Double  calculateDebtLoan(Long loanId) throws JsonProcessingException;
+    Double  calculateDebtLoan(Long loanId, LocalDate before)
+            throws JsonProcessingException;
 }

@@ -3,9 +3,12 @@ package co.com.harcalejo.debtapi.controller;
 import co.com.harcalejo.debtapi.dto.CalculateDebtLoanResponseDTO;
 import co.com.harcalejo.debtapi.service.DebtService;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
 
 @RestController
 @RequestMapping("/debts")
@@ -19,12 +22,15 @@ public class DebtController {
 
     @GetMapping(value = "/loan/{loanId}")
     public ResponseEntity<CalculateDebtLoanResponseDTO> calculateDebtLoan(
-            @PathVariable Long loanId) {
+            @PathVariable Long loanId,
+            @RequestParam(defaultValue = "#{T(java.time.LocalDate).now()}")
+            @DateTimeFormat(iso =
+                    DateTimeFormat.ISO.DATE) LocalDate before) {
         CalculateDebtLoanResponseDTO responseDTO =
                 new CalculateDebtLoanResponseDTO();
         try {
             responseDTO.setBalance(
-                    debtService.calculateDebtLoan(loanId));
+                    debtService.calculateDebtLoan(loanId, before));
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
