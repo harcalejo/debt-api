@@ -25,12 +25,12 @@ public class DebtController {
             @PathVariable Long loanId,
             @RequestParam(defaultValue = "#{T(java.time.LocalDate).now()}")
             @DateTimeFormat(iso =
-                    DateTimeFormat.ISO.DATE) LocalDate before) {
+                    DateTimeFormat.ISO.DATE) LocalDate date) {
         CalculateDebtLoanResponseDTO responseDTO =
                 new CalculateDebtLoanResponseDTO();
         try {
             responseDTO.setBalance(
-                    debtService.calculateDebtLoan(loanId, before));
+                    debtService.calculateDebtLoan(loanId, date));
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
