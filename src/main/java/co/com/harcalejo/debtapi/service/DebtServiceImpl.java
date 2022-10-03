@@ -6,6 +6,7 @@ import co.com.harcalejo.debtapi.dto.PaymentDTO;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.CollectionType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -36,8 +37,14 @@ public class DebtServiceImpl implements DebtService {
      */
     private final DebtProperties debtProperties;
 
-    public DebtServiceImpl(DebtProperties debtProperties) {
+    /**
+     * Bean para el consumo de servicios rest
+     */
+    private final RestTemplate restTemplate;
+
+    public DebtServiceImpl(DebtProperties debtProperties, RestTemplate restTemplate) {
         this.debtProperties = debtProperties;
+        this.restTemplate = restTemplate;
     }
 
     /**
@@ -60,6 +67,20 @@ public class DebtServiceImpl implements DebtService {
     }
 
     /**
+     * Permite obtener el monto del prestamo usando la API de prestamos
+     *
+     * @param loanId identificador unico del prestamo
+     * @return monto del prestamo
+     */
+    private double getLoanAmount(Long loanId) {
+        final ResponseEntity<LoanDTO> response = restTemplate.getForEntity(
+                debtProperties.getLoanApiUrl() + "/" + loanId, LoanDTO.class);
+
+        return response
+                .getBody().getAmount();
+    }
+
+    /**
      * Permite obtener la sumatoria de los montos pagados relacionados
      * a un prestamo
      *
@@ -67,45 +88,15 @@ public class DebtServiceImpl implements DebtService {
      * @return valor total de los pagos realizados a un prestamo
      */
     private double getPaymentsAmount(Long loanId) throws JsonProcessingException {
-        final String response = consumeAPIWithPathVariable(
-                debtProperties.getPaymentApiUrl(), loanId);
+        final String response = restTemplate.getForObject(
+                debtProperties
+                        .getPaymentApiUrl() + "/" + loanId, String.class);
 
         List<PaymentDTO> payments = transformJsonToPaymentList(response);
 
         return payments.stream()
                 .mapToDouble(PaymentDTO::getAmount)
                 .sum();
-    }
-
-    /**
-     * Permite obtener el monto del prestamo usando la API de prestamos
-     *
-     * @param loanId identificador unico del prestamo
-     * @return monto del prestamo
-     */
-    private double getLoanAmount(Long loanId) throws JsonProcessingException {
-        final String response = consumeAPIWithPathVariable(
-                debtProperties.getLoanApiUrl(), loanId);
-
-        ObjectMapper mapper = new ObjectMapper();
-        final LoanDTO loanDTO =
-                mapper.readValue(response, LoanDTO.class);
-        return loanDTO.getAmount();
-    }
-
-    /**
-     * Metodo comun para consumir las API de consulta por Id principal
-     * y retornar un String con el json del response.
-     *
-     * @param url endpoint de la API a consumir
-     * @param id identificador unico de la entidad a consultar
-     * @return el response Json como un String
-     */
-    private String consumeAPIWithPathVariable(String url, Long id) {
-        RestTemplate restTemplate = new RestTemplate();
-
-        return restTemplate.getForObject(
-                url + "/" + id, String.class);
     }
 
     /**

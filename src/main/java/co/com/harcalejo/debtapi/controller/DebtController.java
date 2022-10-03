@@ -30,6 +30,6 @@ public class DebtController {
         }
 
         return new ResponseEntity<>(
-                responseDTO, HttpStatus.CREATED);
+                responseDTO, HttpStatus.OK);
     }
 }
