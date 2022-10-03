@@ -11,6 +11,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.LocalDate;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
@@ -39,6 +41,8 @@ class DebtServiceImplTest {
         loanDTO.setId(loanId);
         loanDTO.setAmount(20000.00);
 
+        LocalDate now = LocalDate.now();
+
         String paymentsLoanResponse = "[\n" +
                 "    {\n" +
                 "        \"id\": 220,\n" +
@@ -64,12 +68,14 @@ class DebtServiceImplTest {
         when(restTemplate
                 .getForObject(
                         debtProperties
-                                .getPaymentApiUrl() + "/" + loanId, String.class))
+                                .getPaymentApiUrl()
+                                + "/" + loanId + "?before=" + now,
+                        String.class))
                 .thenReturn(paymentsLoanResponse);
 
         //then
         assertThat(debtService
-                .calculateDebtLoan(loanId))
+                .calculateDebtLoan(loanId, now))
                 .isEqualTo(10000.00);
     }
 }
