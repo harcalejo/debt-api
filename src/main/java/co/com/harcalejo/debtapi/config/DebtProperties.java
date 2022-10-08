@@ -14,7 +14,6 @@ import org.springframework.context.annotation.PropertySource;
  * @version 1.0.0
  */
 @Configuration
-@PropertySource("classpath:debt.properties")
 @Getter
 public class DebtProperties {
 

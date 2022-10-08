@@ -1,0 +1,10 @@
+server:
+  port: 8085
+spring:
+  application:
+    name: debt-api
+  cloud:
+    config:
+      profile: dev
+      uri:
+        - http://api-config-server:8888
